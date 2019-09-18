@@ -6,7 +6,6 @@ from datetime import datetime
 from tqdm import tqdm
 
 
-
 ##Create Time Stamp
 def TimeStamp(row):
     time = datetime.strptime(row["Trade Time"][:2] + ":" + row["Trade Time"][2:4] + ":" + row["Trade Time"][4:6], "%H:%M:%S").time()
@@ -119,4 +118,25 @@ def OHLCV_index(df, frequency):
     
     df = pd.DataFrame(data=tracker, columns=keys[1:], index=tracker['ts'])
     return df
+
+
+#Create Whole Timestamp list:
+def FillMissingTime(data, timelist):
+    if len(data) == len(timelist):
+        return data
+    else:
+        date = data["ts"].dt.date.iloc[0]
+        timestamp = pd.DataFrame([datetime.combine(date, t) for t in timelist], columns = ["ts"])
+        d = pd.merge(timestamp, data, on="ts", how="left")
+        d["open"] = d["open"].interpolate(method="pad")
+        d["high"] = d["high"].interpolate(method="pad")
+        d["low"] = d["low"].interpolate(method="pad")
+        d["close"] = d["close"].interpolate(method="pad")
+
+        d["vol"] = d["vol"].fillna(0)
+        d["VWAP"] = d["VWAP"].fillna(0)
+
+        return d
+
+
 

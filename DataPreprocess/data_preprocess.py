@@ -9,6 +9,7 @@ from functools import partial
 import data_preprocess_function as func
 
 
+###2330###
 ##Read 2330 Data
 filepath = "D:\\Strategic_Trading\\2330\\trade\\"
 file_list = os.listdir(filepath)
@@ -20,6 +21,8 @@ if __name__ == '__main__':
             df_list.append(x)
             
 data = pd.concat(df_list)
+
+
 
 ##Extract 2330 OHLCV
 df_list = [group[1] for group in data.groupby(data["ts"].dt.date)]
@@ -33,8 +36,28 @@ if __name__ == '__main__':
 df = pd.concat(OHLCV_list)
 df = df.sort_values(by=['ts'])
 
+
+
+##Fill Missing Timestamp
+df_list = [group[1] for group in df.groupby(df["ts"].dt.date)]
+timelist = df["ts"].dt.time.unique().tolist()
+fill_list = []
+
+if __name__ == '__main__':
+    with Pool(processes=12) as pool:
+        for i, x in enumerate(tqdm(pool.imap_unordered(partial(func.FillMissingTime, timelist=timelist), df_list), total=len(df_list)), 1):
+                fill_list.append(x)
+
+df = pd.concat(fill_list)
+df = df.sort_values(by=['ts'])
+df = df.reset_index(drop=True)
+
 df.to_csv("D:\\Strategic_Trading\\PriceForecast\\data\\2330\\min_OHLCV.csv", index=False)
 
+
+
+
+###Index Data###
 ##Read Index Data
 filepath = "D:\\Strategic_Trading\\index\\price\\"
 file_list = os.listdir(filepath)
@@ -49,6 +72,8 @@ data = pd.concat(df_list)
 
 data['this_volume'] = data['累積成交數量']-data['累積成交數量'].shift(periods=1,fill_value=0)
 data.loc[(data['時間']=='09:00:00'),'this_volume'] = 0
+
+
 
 #Extract Index OHLCV 
 df_list = [group[1] for group in data.groupby('日期')]
