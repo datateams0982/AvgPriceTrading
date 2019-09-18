@@ -158,12 +158,6 @@ def CCI(index, data):
     
     return CCI
 
-#Compute Bollinger Bands
-def BBANDS_std(index, data, period):
-    df = data.iloc[(index - period):(index+1)]
-    std = (((df["close"] - df["MA20"])**2).mean())**(1/2)
-    
-    return std
 
 #Compute On Balance Volume
 def OBV(index, data):

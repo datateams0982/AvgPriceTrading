@@ -85,14 +85,7 @@ def Feature_Engineering(df, term): ##term: How many periods for MA/EMA calculati
     
     #Compute BBANDS
     print("Calculating BBANDs")
-    data["uBBAND"], data["lBBAND"] = np.nan, np.nan
-    for i in tqdm(range(len(data))):
-        if i < 20:
-            continue
-        else:
-            std = func.BBANDS_std(i, data, term)
-            data["uBBAND"][i] = data["MA20"][i] + 2*std
-            data["lBBAND"][i] = data["MA20"][i] - 2*std
+    data["uBBAND"], data["lBBAND"] = data["MA20"] + 2*data.close.rolling(term).std(), data["MA20"] - 2*data.close.rolling(term).std()
 
     
     #Compute On Balance Volume
