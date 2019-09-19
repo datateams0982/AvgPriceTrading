@@ -14,6 +14,7 @@ def TimeStamp(row):
     
     return timestamp
 
+##Read
 #Read and Join Index Data
 def read_and_join(file):
     df_index = pd.read_csv('D:\\Strategic_Trading\\index\\price\\'+ file)[['日期','時間','發行量加權股價指數']]
@@ -36,7 +37,8 @@ def ReadFile_2330(f, filepath):
     return data
 
 
-##Extract OHLCV of 2330
+##OHLCV
+#Extract OHLCV of 2330
 def OHLCV_2330(df, frequency):
     keys = [
         'ts',
@@ -52,7 +54,7 @@ def OHLCV_2330(df, frequency):
     for k in keys: tracker[k] = []
     
     df.index = pd.to_datetime(df['ts'])
-    groups = df.groupby(pd.Grouper(freq=(str(frequency) + "min")))
+    groups = df.groupby(pd.Grouper(freq=frequency))
 
     for group in groups:
         g1 = group[1]
@@ -94,7 +96,7 @@ def OHLCV_index(df, frequency):
     for k in keys: tracker[k] = []
     
     df.index = pd.to_datetime(df['日期'] + ' ' + df['時間'])
-    groups = df.groupby(pd.Grouper(freq=str(frequency)+"min"))
+    groups = df.groupby(pd.Grouper(freq=frequency))
 
     for group in groups:
         g1 = group[1]
@@ -120,6 +122,7 @@ def OHLCV_index(df, frequency):
     return df
 
 
+##Fill missing value
 #Create Whole Timestamp list:
 def FillMissingTime(data, timelist):
     if len(data) == len(timelist):
@@ -137,6 +140,34 @@ def FillMissingTime(data, timelist):
         d["VWAP"] = d["VWAP"].fillna(0)
 
         return d
+
+
+##Daily Aggregation
+#Daily Aggreration of 2330
+def DailyOHLCV_2330(df):
+    
+    ts = df.iloc[0]["ts"].date()
+    open = df.iloc[0]['open']
+    high = df['high'].max()
+    low = df['low'].min()
+    close = df.iloc[-1]['close']
+    vol = df['vol'].sum()
+    vwap = (df["VWAP"] * df["vol"]).sum() / df["vol"].sum()
+    
+    return [ts, open, high, low, close, vol, vwap]
+
+
+#Daily Aggreration of index
+def DailyOHLCV_Index(df):
+    
+    ts = df.iloc[0]["ts"].date()
+    open = df.iloc[0]['open_index']
+    high = df['high_index'].max()
+    low = df['low_index'].min()
+    close = df.iloc[-1]['close_index']
+    vol = df['vol_index'].sum()
+    
+    return [ts, open, high, low, close, vol]
 
 
 

@@ -43,15 +43,16 @@ def MonthPeriod(row):
 
 #Transform week information by linear function
 def WeekTime(row):
-    year = row["ts"].year
-    month = row["ts"].month
-    date = row["ts"].date()
-    week = 0
-    while date.month == month:
-        week += 1
-        date -= timedelta(days=7)
+    y, m, d, date = row["ts"].year, row["ts"].month, row["ts"].day, row["ts"].date()
+    week = date.isocalendar()[1] - date.replace(day=1).isocalendar()[1] + 1
+
+    if week < 0:
+        if m == 1:
+            week = date.isocalendar()[1] + 1
+        else:
+            week = date.replace(day = d-7).isocalendar()[1] - date.replace(day=1).isocalendar()[1] + 2
         
-    total = len(calendar.monthcalendar(year,month))
+    total = len(calendar.monthcalendar(y, m))
     week_time = (week - 1)/(total - 1)
 
     return week_time
